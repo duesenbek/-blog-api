@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            color: #333;
+            background-color: #fff;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            font-weight: normal;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #333;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background-color: #000;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .blog-item {
+            border-bottom: 1px solid #eee;
+            padding: 20px 0;
+        }
+
+        .blog-title {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .blog-body {
+            margin-bottom: 10px;
+            color: #555;
+        }
+
+        .delete-btn {
+            background-color: transparent;
+            color: #c00;
+            padding: 0;
+            font-size: 12px;
+        }
+
+        .delete-btn:hover {
+            background-color: transparent;
+            text-decoration: underline;
+        }
+
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            padding: 10px 20px;
+            background-color: #333;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 14px;
+            animation: fadeIn 0.3s, fadeOut 0.3s 2.7s forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Create</h2>
+        <div>
+            <input id="title" placeholder="Title">
+            <textarea id="body" rows="4" placeholder="Content..."></textarea>
+            <button onclick="createBlog()">Publish</button>
+        </div>
+
+        <h2 style="margin-top: 40px;">Posts</h2>
+        <ul id="list"></ul>
+    </div>
+
+    <div id="toast-container" class="toast-container"></div>
+
+    <script>
+        function showToast(msg) {
+            const container = document.getElementById('toast-container');
+            const el = document.createElement('div');
+            el.className = 'toast';
+            el.innerText = msg;
+            container.appendChild(el);
+            setTimeout(() => el.remove(), 3000);
+        }
+
+        async function createBlog() {
+            const t = title.value.trim();
+            const b = body.value.trim();
+            if (!t || !b) {
+                showToast('Title and content required');
+                return;
+            }
+            try {
+                const res = await fetch('/blogs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: t, body: b })
+                });
+                if (res.ok) {
+                    title.value = '';
+                    body.value = '';
+                    showToast('Published');
+                    loadBlogs();
+                } else {
+                    showToast('Error creating post');
+                }
+            } catch {
+                showToast('Network error');
+            }
+        }
+
+        async function deleteBlog(id) {
+            if (!confirm('Delete?')) return;
+            try {
+                const res = await fetch('/blogs/' + id, { method: 'DELETE' });
+                if (res.ok) {
+                    showToast('Deleted');
+                    loadBlogs();
+                } else {
+                    showToast('Error deleting');
+                }
+            } catch {
+                showToast('Network error');
+            }
+        }
+
+        async function loadBlogs() {
+            try {
+                const res = await fetch('/blogs');
+                const data = await res.json();
+                list.innerHTML = '';
+                data.reverse().forEach(item => {
+                    list.innerHTML += `
+                    <li class="blog-item">
+                        <div class="blog-title">${item.title}</div>
+                        <div class="blog-body">${item.body}</div>
+                        <button class="delete-btn" onclick="deleteBlog('${item._id}')">Delete</button>
+                    </li>
+                `;
+                });
+            } catch {
+                showToast('Error loading posts');
+            }
+        }
+        loadBlogs();
+    </script>
+</body>
+
+</html>
