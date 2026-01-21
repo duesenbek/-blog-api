@@ -61,6 +61,12 @@ Screenshots below demonstrate successful requests and error handling.
 ### Get All Blogs (GET)
 ![GET All](screenshots/postman_get_all.png)
 
+### Get one blog (GET)
+<img width="1354" height="824" alt="Снимок экрана 2026-01-21 175740" src="https://github.com/user-attachments/assets/aae488d7-373c-4885-894e-ade67f9862c6" />
+
+### Update (PUT)
+<img width="1362" height="853" alt="Снимок экрана 2026-01-21 175641" src="https://github.com/user-attachments/assets/34bd6942-ecec-4d4e-b49e-17bf0a7644d9" />
+
 ### Delete Blog (DELETE)
 ![DELETE](screenshots/postman_delete.png)
 
